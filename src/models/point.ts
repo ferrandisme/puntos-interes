@@ -1,13 +1,12 @@
 import mongoose, { Schema, Document, models, model } from "mongoose";
 
 export interface IPoint extends Document {
-  category: String;
-  name: String;
-  author: String;
-  latitude: Number;
-  longitude: Number;
-  description: String;
-
+  category: string;
+  name: string;
+  author: string;
+  latitude: number;
+  longitude: number;
+  description: string;
 }
 
 const PointSchema = new Schema<IPoint>({
@@ -15,27 +14,26 @@ const PointSchema = new Schema<IPoint>({
     type: String,
     required: true,
   },
-    name: {
+  name: {
     type: String,
     required: true,
   },
-    author: {
+  author: {
     type: String,
     required: true,
   },
-    latitude: {
-    type: Number,
-    required: true,
-  }
-  ,
-    longitude: {
+  latitude: {
     type: Number,
     required: true,
   },
-    description: {
+  longitude: {
+    type: Number,
+    required: true,
+  },
+  description: {
     type: String,
     required: true,
-  }
+  },
 });
 
 const Point = models.Point || model<IPoint>("Point", PointSchema);

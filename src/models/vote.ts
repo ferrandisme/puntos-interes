@@ -1,10 +1,9 @@
 import mongoose, { Schema, Document, models, model } from "mongoose";
 
 export interface IVote extends Document {
-  userId: String;
-  pointId: String;
-  score: Number;
-
+  userId: string;
+  pointId: string;
+  score: number;
 }
 
 const VoteSchema = new Schema<IVote>({
@@ -12,14 +11,14 @@ const VoteSchema = new Schema<IVote>({
     type: String,
     required: true,
   },
-    pointId: {
+  pointId: {
     type: String,
     required: true,
   },
-    score: {
+  score: {
     type: Number,
     required: true,
-  }
+  },
 });
 
 const Vote = models.Vote || model<IVote>("Vote", VoteSchema);
