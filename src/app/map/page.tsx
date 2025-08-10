@@ -1,28 +1,82 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
-const Map = dynamic(() => import("../../components/points/map"), {
-  ssr: false,
-});
-//import Map from "../components/points/map";
+export default function MapPage() {
+  const searchParams = useSearchParams();
+  const [mapConfig, setMapConfig] = useState({
+    coords: [40.4168, -3.7038] as [number, number], // Default
+    zoom: 13,
+    cityName: "Madrid",
+  });
 
-export default function Home() {
-  const Map = useMemo(
+  const MapComponent = useMemo(
     () =>
       dynamic(() => import("../../components/points/map"), {
-        loading: () => <p>A map is loading</p>,
+        loading: () => (
+          <div className="w-full h-full flex items-center justify-center bg-gray-100">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">
+                Cargando mapa de {mapConfig.cityName}...
+              </p>
+            </div>
+          </div>
+        ),
         ssr: false,
       }),
-    []
+    [mapConfig.cityName]
   );
 
-  const coords = [51.505, -0.09];
-  const zoom = 19;
+  useEffect(() => {
+    const lat = searchParams.get("lat");
+    const lng = searchParams.get("lng");
+    const city = searchParams.get("city");
+
+    if (lat && lng) {
+      setMapConfig({
+        coords: [parseFloat(lat), parseFloat(lng)],
+        zoom: 13,
+        cityName: city || "Ciudad seleccionada",
+      });
+    }
+  }, [searchParams]);
 
   return (
-    <div className="w-full h-screen">
-      <Map position={coords} zoom={zoom}></Map>
+    <div className="w-full relative">
+      <div className="absolute top-4 right-4 z-[60]">
+        <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg flex items-center space-x-3">
+          <h1 className="text-lg font-semibold text-gray-900">
+            Explorando {mapConfig.cityName}
+          </h1>
+
+          <button
+            onClick={() => window.history.back()}
+            className="bg-gray-100/80 hover:bg-gray-200 hover:shadow-md transition-all rounded-md p-2 group"
+            aria-label="Volver al inicio"
+            title="Volver al inicio"
+          >
+            <svg
+              className="w-4 h-4 text-gray-700 group-hover:text-blue-600 transition-colors"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div className="w-full h-[calc(100vh-64px)]">
+        <MapComponent position={mapConfig.coords} zoom={mapConfig.zoom} />
+      </div>
     </div>
   );
 }
