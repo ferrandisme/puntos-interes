@@ -116,7 +116,7 @@ export default function Map({ position, zoom }: MapProps) {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const triggerRefresh = () => {
-    setRefreshTrigger(prev => prev + 1);
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   return (
