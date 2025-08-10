@@ -9,6 +9,8 @@ export interface IPoint extends Document {
     type: "Point";
     coordinates: [number, number]; // [longitude, latitude]
   };
+  votes: number;
+  rating: number;
 }
 
 const PointSchema = new Schema<IPoint>({
@@ -24,7 +26,7 @@ const PointSchema = new Schema<IPoint>({
     type: String,
     required: true,
   },
- location: {
+  location: {
     type: { type: String, enum: ["Point"], required: true, default: "Point" },
     coordinates: { type: [Number], required: true }, // [longitude, latitude]
   },
@@ -32,6 +34,14 @@ const PointSchema = new Schema<IPoint>({
   description: {
     type: String,
     required: true,
+  },
+  votes: {
+    type: Number,
+    required: false,
+  },
+  rating: {
+    type: Number,
+    required: false,
   },
 });
 

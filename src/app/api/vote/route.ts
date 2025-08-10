@@ -33,3 +33,15 @@ export const POST = async (request: NextRequest): Promise<Response> => {
     return new Response("Failed to create vote", { status: 500 });
   }
 };
+
+export const GET = async (): Promise<Response> => {
+  try {
+    await connectToMongo();
+    const votes = await Vote.find({});
+    return new Response(JSON.stringify(votes), { status: 200 });
+  } catch (error) {
+    console.error("Error fetching votes:", error);
+    return new Response("Failed to fetch votes", { status: 500 });
+  }
+};
+

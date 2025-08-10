@@ -25,4 +25,6 @@ export interface Point {
   };
   createdAt?: Date;
   updatedAt?: Date;
+  votes?: number;
+  rating?: number;
 }
