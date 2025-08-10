@@ -3,6 +3,7 @@
 import React from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
 import MapUpdater from "./MapUpdater";
+import MapClickHandler from "./MapClickHandler";
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
@@ -28,6 +29,7 @@ export default function Map({ position, zoom }: MapProps) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <MapUpdater center={position} zoom={zoom} />
+        <MapClickHandler />
         {/*         <Marker position={position}>
           <Tooltip>Punto de ejemplo Londres</Tooltip>
         </Marker> */}
