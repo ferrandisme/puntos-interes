@@ -1,0 +1,6 @@
+API
+Get Points -> Listado con coordenadas, id y nombre para ponerlos en el mapa. Filtrado (opcional?) por cerca de X coordenadas, y opcionalmente? por categoria
+Get Point -> Por id, da un Point con todos sus detalles para vista detallada cuando hacen clic, tap. Nombre, Descripcion, Autor, Puntuacion etc 
+Get Categories -> Listado con Nombre de todas las categories
+POST Point -> Recibiendo coordenadas, nombre, descripcion, autor, categoria
+Post Vote/Puntuacion como se llame -> Recibiendo idPost, puntos, autor
