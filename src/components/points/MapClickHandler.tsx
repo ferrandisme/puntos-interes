@@ -52,7 +52,6 @@ export default function MapClickHandler() {
       body: JSON.stringify({
         latitude: coords.lat,
         longitude: coords.lng,
-        author: data.user.email || data.user.id || "anon",
         ...form,
       }),
     });
@@ -105,4 +104,3 @@ export default function MapClickHandler() {
     </Dialog>
   );
 }
-
