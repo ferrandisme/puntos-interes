@@ -4,11 +4,12 @@ import { NextRequest } from "next/server";
 
 export const GET = async (
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<Response> => {
   try {
     await connectToMongo();
-    const point = await Point.findById(params.id);
+    const { id } = await params;
+    const point = await Point.findById(id);
     if (!point) {
       return new Response("Point not found", { status: 404 });
     }
