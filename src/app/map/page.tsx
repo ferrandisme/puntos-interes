@@ -21,10 +21,8 @@ export default function Home() {
   const zoom = 19;
 
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <div>
-        <Map position={coords} zoom={zoom}></Map>
-      </div>
+    <div className="w-full h-screen">
+      <Map position={coords} zoom={zoom}></Map>
     </div>
   );
 }
