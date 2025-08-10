@@ -13,7 +13,7 @@ export default function MapPage() {
 
   const MapComponent = useMemo(
     () =>
-      dynamic(() => import("../../components/points/map"), {
+      dynamic(() => import("../../components/points/Map"), {
         loading: () => (
           <div className="w-full h-full flex items-center justify-center bg-gray-100">
             <div className="text-center">
