@@ -12,7 +12,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useSession } from "@/utils/auth-client";
 
 export default function MapClickHandler() {
   const [open, setOpen] = useState(false);
@@ -22,17 +21,13 @@ export default function MapClickHandler() {
   const [form, setForm] = useState({
     name: "",
     description: "",
+    author: "",
     category: "",
   });
   const [loading, setLoading] = useState(false);
-  const { data, isPending, error } = useSession();
 
   useMapEvents({
     click: (e) => {
-      if (!data || !data.user) {
-        alert("Debes iniciar sesión para añadir un punto de interés.");
-        return;
-      }
       setCoords({ lat: e.latlng.lat, lng: e.latlng.lng });
       setOpen(true);
     },
@@ -44,7 +39,7 @@ export default function MapClickHandler() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!coords || !data?.user) return;
+    if (!coords) return;
     setLoading(true);
     await fetch("/api/points", {
       method: "POST",
@@ -57,7 +52,7 @@ export default function MapClickHandler() {
     });
     setLoading(false);
     setOpen(false);
-    setForm({ name: "", description: "", category: "" });
+    setForm({ name: "", description: "", author: "", category: "" });
   };
 
   return (
@@ -81,6 +76,15 @@ export default function MapClickHandler() {
             <Input
               name="description"
               value={form.description}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div>
+            <Label>Autor</Label>
+            <Input
+              name="author"
+              value={form.author}
               onChange={handleChange}
               required
             />
