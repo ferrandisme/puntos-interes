@@ -48,7 +48,7 @@ function MapPageContent() {
       <div className="absolute top-4 right-4 z-[60]">
         <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg flex items-center space-x-3">
           <h1 className="text-lg font-semibold text-gray-900">
-            Explorando {mapConfig.cityName}
+            {mapConfig.cityName}
           </h1>
 
           <button
