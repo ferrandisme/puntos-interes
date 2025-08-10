@@ -4,9 +4,11 @@ export interface IPoint extends Document {
   category: string;
   name: string;
   author: string;
-  latitude: number;
-  longitude: number;
   description: string;
+  location: {
+    type: "Point";
+    coordinates: [number, number]; // [longitude, latitude]
+  };
 }
 
 const PointSchema = new Schema<IPoint>({
@@ -22,19 +24,19 @@ const PointSchema = new Schema<IPoint>({
     type: String,
     required: true,
   },
-  latitude: {
-    type: Number,
-    required: true,
+ location: {
+    type: { type: String, enum: ["Point"], required: true, default: "Point" },
+    coordinates: { type: [Number], required: true }, // [longitude, latitude]
   },
-  longitude: {
-    type: Number,
-    required: true,
-  },
+
   description: {
     type: String,
     required: true,
   },
 });
+
+// Índice geoespacial para búsquedas rápidas
+PointSchema.index({ location: "2dsphere" });
 
 const Point = models.Point || model<IPoint>("Point", PointSchema);
 export default Point;

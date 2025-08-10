@@ -16,7 +16,8 @@ export const GET = async (request: NextRequest): Promise<Response> => {
 export const POST = async (request: NextRequest): Promise<Response> => {
   try {
     await connectToMongo();
-    const { latitude, longitude, name, description, author, category } = await request.json();
+    const { latitude, longitude, name, description, author, category } =
+      await request.json();
 
     if (
       typeof latitude !== "number" ||
@@ -30,8 +31,10 @@ export const POST = async (request: NextRequest): Promise<Response> => {
     }
 
     const newPoint = new Point({
-      latitude,
-      longitude,
+      location: {
+        type: "Point",
+        coordinates: [longitude, latitude],
+      },
       name,
       description,
       author,
