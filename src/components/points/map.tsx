@@ -1,16 +1,24 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
+import React, { useState } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMapEvents,
+} from "react-leaflet";
 import L from "leaflet";
 import MapClickHandler from "./MapClickHandler";
+import PointDetails from "./PointDetails";
+import { Point } from "@/types";
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 
 function PointsLayer() {
-  const [points, setPoints] = useState<any[]>([]);
-  const [selectedPoint, setSelectedPoint] = useState<any | null>(null);
+  const [points, setPoints] = useState<Point[]>([]);
+  const [selectedPointId, setSelectedPointId] = useState<string | null>(null);
   const [popupPos, setPopupPos] = useState<[number, number] | null>(null);
 
   const fetchPoints = async (center: L.LatLng, radius: number) => {
@@ -47,10 +55,8 @@ function PointsLayer() {
   });
 
   // Cargar detalles al hacer click en un marcador
-  const handleMarkerClick = async (point: any) => {
-    const res = await fetch(`/api/points/${point._id}`);
-    const data = await res.json();
-    setSelectedPoint(data);
+  const handleMarkerClick = (point: Point) => {
+    setSelectedPointId(point._id);
     setPopupPos([point.location.coordinates[1], point.location.coordinates[0]]);
   };
 
@@ -68,23 +74,14 @@ function PointsLayer() {
           }}
         />
       ))}
-      {selectedPoint && popupPos && (
+      {selectedPointId && popupPos && (
         <Popup
           position={popupPos}
           eventHandlers={{
-            remove: () => setSelectedPoint(null),
+            remove: () => setSelectedPointId(null),
           }}
         >
-          <div>
-            <strong>{selectedPoint.name}</strong>
-            <p>{selectedPoint.description}</p>
-            <p>
-              <b>Categoría:</b> {selectedPoint.category}
-            </p>
-            <p>
-              <b>Autor:</b> {selectedPoint.author}
-            </p>
-          </div>
+          <PointDetails id={selectedPointId} />
         </Popup>
       )}
     </>
