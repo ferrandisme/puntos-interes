@@ -1,6 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Point } from "@/types";
+import { useSession } from "@/utils/auth-client";
+import { usePointVote } from "@/hooks/use-point-vote";
+import StarRating from "@/components/ui/star-rating";
 
 interface PointDetailsProps {
   id: string;
@@ -9,6 +12,8 @@ interface PointDetailsProps {
 export default function PointDetails({ id }: PointDetailsProps) {
   const [point, setPoint] = useState<Point>();
   const [loading, setLoading] = useState(true);
+  const { data: session } = useSession();
+  const { userHasVoted, userVote, isVoting, submitVote } = usePointVote(id);
 
   useEffect(() => {
     const fetchPoint = async () => {
@@ -25,6 +30,18 @@ export default function PointDetails({ id }: PointDetailsProps) {
     };
     fetchPoint();
   }, [id]);
+
+  const handleVote = async (score: number) => {
+    const success = await submitVote(score);
+    if (success) {
+      // Refrescar los datos del punto para obtener la nueva puntuación
+      const pointResponse = await fetch("/api/points/" + id);
+      if (pointResponse.ok) {
+        const updatedPoint = await pointResponse.json();
+        setPoint(updatedPoint);
+      }
+    }
+  };
 
   if (loading) {
     return (
@@ -50,10 +67,59 @@ export default function PointDetails({ id }: PointDetailsProps) {
       </div>
 
       {point?.description && (
-        <div className="text-sm text-gray-700 leading-relaxed">
+        <div className="text-sm text-gray-700 leading-relaxed mb-4">
           {point.description}
         </div>
       )}
+
+      {/* Rating y votación */}
+      <div className="border-t pt-3 mt-3">
+        <div className="flex items-center justify-center mb-3">
+          <span className="text-sm font-medium text-gray-700">
+            {point?.rating && point?.votes ? (
+              <>
+                {point.rating.toFixed(1)}⭐ ({point.votes} voto{point.votes !== 1 ? "s" : ""})
+              </>
+            ) : (
+              "Sin calificar aún"
+            )}
+          </span>
+        </div>
+
+        {session?.user && (
+          <div className="mt-3">
+            {userHasVoted ? (
+              <div className="text-center">
+                <p className="text-xs text-gray-500 mb-1">Tu votación:</p>
+                <StarRating rating={userVote} readonly size="sm" centered={true} />
+              </div>
+            ) : (
+              <div className="text-center">
+                <p className="text-xs text-gray-700 mb-2">
+                  Califica este lugar:
+                </p>
+                <StarRating 
+                  rating={0} 
+                  onRatingChange={handleVote} 
+                  size="md" 
+                  centered={true}
+                />
+                {isVoting && (
+                  <p className="text-xs text-blue-600 mt-1">Enviando voto...</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {!session?.user && (
+          <div className="text-center mt-3">
+            <p className="text-xs text-gray-500">
+              Inicia sesión para calificar este lugar
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
