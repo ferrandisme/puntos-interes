@@ -19,6 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useSession } from "@/utils/auth-client";
+import { useAuthModals } from "@/components/auth";
 
 interface Category {
   _id: string;
@@ -45,6 +47,10 @@ export default function MapClickHandler({
   });
   const [loading, setLoading] = useState(false);
 
+  // Auth hooks
+  const { data: session } = useSession();
+  const { openLogin, AuthModalsComponent } = useAuthModals();
+
   // Cargar categorías al montar el componente
   useEffect(() => {
     const fetchCategories = async () => {
@@ -64,6 +70,11 @@ export default function MapClickHandler({
 
   useMapEvents({
     click: (e) => {
+      if (!session?.user) {
+        openLogin();
+        return;
+      }
+
       setCoords({ lat: e.latlng.lat, lng: e.latlng.lng });
       setOpen(true);
     },
@@ -106,53 +117,60 @@ export default function MapClickHandler({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Nuevo Punto de Interés</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-2">
-          <div>
-            <Label>Nombre</Label>
-            <Input
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div>
-            <Label>Descripción</Label>
-            <Input
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              required
-            />
-          </div>
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nuevo Punto de Interés</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-2">
+            <div>
+              <Label>Nombre</Label>
+              <Input
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div>
+              <Label>Descripción</Label>
+              <Input
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-          <div>
-            <Label>Categoría</Label>
-            <Select value={form.category} onValueChange={handleCategoryChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecciona una categoría" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((category) => (
-                  <SelectItem key={category._id} value={category._id}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <DialogFooter>
-            <Button type="submit" disabled={loading}>
-              {loading ? "Guardando..." : "Guardar"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+            <div>
+              <Label>Categoría</Label>
+              <Select
+                value={form.category}
+                onValueChange={handleCategoryChange}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecciona una categoría" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category._id} value={category._id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter>
+              <Button type="submit" disabled={loading}>
+                {loading ? "Guardando..." : "Guardar"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <AuthModalsComponent />
+    </>
   );
 }
