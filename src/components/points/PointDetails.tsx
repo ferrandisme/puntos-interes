@@ -60,7 +60,7 @@ export default function PointDetails({ id }: PointDetailsProps) {
         <h3 className="text-lg font-bold text-gray-900 mb-1">{point?.name}</h3>
         <div className="flex justify-between items-center mb-2">
           <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">
-            {point?.category}
+            {point?.category?.name}
           </span>
           {/* <span className="text-xs text-gray-500">Por: {point?.author}</span> */}
         </div>

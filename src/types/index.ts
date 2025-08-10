@@ -15,7 +15,7 @@ export interface Category {
 
 export interface Point {
   _id: string;
-  category: string;
+  category: Category;
   name: string;
   author: string;
   description: string;

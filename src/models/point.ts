@@ -1,7 +1,8 @@
 import { Schema, Document, models, model } from "mongoose";
+import { Types } from "mongoose";
 
 export interface IPoint extends Document {
-  category: string;
+  category: Types.ObjectId;
   name: string;
   author: string;
   description: string;
@@ -15,7 +16,8 @@ export interface IPoint extends Document {
 
 const PointSchema = new Schema<IPoint>({
   category: {
-    type: String,
+    type: Schema.Types.ObjectId,
+    ref: "Category",
     required: true,
   },
   name: {

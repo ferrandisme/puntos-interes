@@ -9,7 +9,7 @@ export const GET = async (
   try {
     await connectToMongo();
     const { id } = await params;
-    const point = await Point.findById(id);
+    const point = await Point.findById(id).populate('category');
     if (!point) {
       return new Response("Point not found", { status: 404 });
     }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMapEvents } from "react-leaflet";
 import {
   Dialog,
@@ -12,6 +12,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+interface Category {
+  _id: string;
+  name: string;
+}
 
 interface MapClickHandlerProps {
   onPointCreated: () => void;
@@ -24,6 +36,7 @@ export default function MapClickHandler({
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
     null
   );
+  const [categories, setCategories] = useState<Category[]>([]);
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -31,6 +44,23 @@ export default function MapClickHandler({
     category: "",
   });
   const [loading, setLoading] = useState(false);
+
+  // Cargar categorías al montar el componente
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("/api/categories");
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data);
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   useMapEvents({
     click: (e) => {
@@ -41,6 +71,10 @@ export default function MapClickHandler({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setForm({ ...form, category: value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -99,12 +133,18 @@ export default function MapClickHandler({
 
           <div>
             <Label>Categoría</Label>
-            <Input
-              name="category"
-              value={form.category}
-              onChange={handleChange}
-              required
-            />
+            <Select value={form.category} onValueChange={handleCategoryChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona una categoría" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem key={category._id} value={category._id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <DialogFooter>
             <Button type="submit" disabled={loading}>
