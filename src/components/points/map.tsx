@@ -16,18 +16,28 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 
-function PointsLayer({ refreshTrigger }: { refreshTrigger: number }) {
+function PointsLayer({
+  refreshTrigger,
+  position,
+}: {
+  refreshTrigger: number;
+  position: [number, number];
+}) {
   const [points, setPoints] = useState<Point[]>([]);
   const [selectedPointId, setSelectedPointId] = useState<string | null>(null);
   const [popupPos, setPopupPos] = useState<[number, number] | null>(null);
   const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
 
   const fetchPoints = async (center: L.LatLng, radius: number) => {
-    const res = await fetch(
-      `/api/points/near?latitude=${center.lat}&longitude=${center.lng}&radius=${radius}`
-    );
-    const data = await res.json();
-    setPoints(data);
+    try {
+      const res = await fetch(
+        `/api/points/near?latitude=${center.lat}&longitude=${center.lng}&radius=${radius}`
+      );
+      const data = await res.json();
+      setPoints(data);
+    } catch (error) {
+      console.error("Error fetching points:", error);
+    }
   };
 
   // Función para refrescar los puntos del área visible actual
@@ -45,6 +55,15 @@ function PointsLayer({ refreshTrigger }: { refreshTrigger: number }) {
       refreshPoints();
     }
   }, [refreshTrigger, refreshPoints]);
+
+  // Cargar puntos cuando cambie la posición inicial del mapa
+  React.useEffect(() => {
+    if (mapInstance && position) {
+      const center = L.latLng(position[0], position[1]);
+      const radius = getRadius(mapInstance);
+      fetchPoints(center, radius);
+    }
+  }, [position, mapInstance]);
 
   // Calcula el radio visible del mapa en metros (aprox)
   const getRadius = (map: L.Map) => {
@@ -64,7 +83,7 @@ function PointsLayer({ refreshTrigger }: { refreshTrigger: number }) {
     return maxDistance;
   };
 
-  useMapEvents({
+  const map = useMapEvents({
     moveend: (e) => {
       const map = e.target;
       setMapInstance(map);
@@ -72,15 +91,23 @@ function PointsLayer({ refreshTrigger }: { refreshTrigger: number }) {
       const radius = getRadius(map);
       fetchPoints(center, radius);
     },
-    // Carga inicial
-    load: (e) => {
+    zoomend: (e) => {
       const map = e.target;
-      setMapInstance(map);
       const center = map.getCenter();
       const radius = getRadius(map);
       fetchPoints(center, radius);
     },
   });
+
+  // Efecto para cargar puntos cuando el mapa y la instancia estén listos
+  React.useEffect(() => {
+    if (map && !mapInstance) {
+      setMapInstance(map);
+      const center = map.getCenter();
+      const radius = getRadius(map);
+      fetchPoints(center, radius);
+    }
+  }, [map, mapInstance]);
 
   // Cargar detalles al hacer click en un marcador
   const handleMarkerClick = (point: Point) => {
@@ -133,6 +160,7 @@ export default function Map({ position, zoom }: MapProps) {
       <MapContainer
         center={position}
         zoom={zoom}
+        minZoom={10}
         scrollWheelZoom={true}
         style={{ height: "100%", width: "100%" }}
         className="z-0"
@@ -142,7 +170,7 @@ export default function Map({ position, zoom }: MapProps) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <PointsLayer refreshTrigger={refreshTrigger} />
+        <PointsLayer refreshTrigger={refreshTrigger} position={position} />
         <MapClickHandler onPointCreated={triggerRefresh} />
       </MapContainer>
     </div>

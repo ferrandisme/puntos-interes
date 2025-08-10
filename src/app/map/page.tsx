@@ -7,7 +7,7 @@ export default function MapPage() {
   const searchParams = useSearchParams();
   const [mapConfig, setMapConfig] = useState({
     coords: [40.4168, -3.7038] as [number, number], // Default
-    zoom: 13,
+    zoom: 14,
     cityName: "Madrid",
   });
 
@@ -37,7 +37,7 @@ export default function MapPage() {
     if (lat && lng) {
       setMapConfig({
         coords: [parseFloat(lat), parseFloat(lng)],
-        zoom: 13,
+        zoom: 14,
         cityName: city || "Ciudad seleccionada",
       });
     }
