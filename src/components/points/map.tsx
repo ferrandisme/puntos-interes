@@ -50,9 +50,18 @@ function PointsLayer({ refreshTrigger }: { refreshTrigger: number }) {
   const getRadius = (map: L.Map) => {
     const bounds = map.getBounds();
     const center = map.getCenter();
-    const north = bounds.getNorth();
-    // Distancia del centro al norte del mapa
-    return map.distance(center, L.latLng(north, center.lng));
+    const corners = [
+      bounds.getNorthEast(),
+      bounds.getNorthWest(),
+      bounds.getSouthEast(),
+      bounds.getSouthWest(),
+    ];
+
+    const maxDistance = Math.max(
+      ...corners.map((corner) => map.distance(center, corner))
+    );
+
+    return maxDistance;
   };
 
   useMapEvents({
