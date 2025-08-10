@@ -1,0 +1,19 @@
+import Point from "@/models/point";
+import { connectToMongo } from "@/utils/database/mongodb/mongo";
+import { NextRequest } from "next/server";
+
+export const GET = async (
+  request: NextRequest,
+  { params }: { params: { id: string } }
+): Promise<Response> => {
+  try {
+    await connectToMongo();
+    const point = await Point.findById(params.id);
+    if (!point) {
+      return new Response("Point not found", { status: 404 });
+    }
+    return new Response(JSON.stringify(point), { status: 200 });
+  } catch (error) {
+    return new Response("Failed to fetch point", { status: 500 });
+  }
+};
