@@ -13,7 +13,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
-export default function MapClickHandler() {
+interface MapClickHandlerProps {
+  onPointCreated: () => void;
+}
+
+export default function MapClickHandler({
+  onPointCreated,
+}: MapClickHandlerProps) {
   const [open, setOpen] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
     null
@@ -41,15 +47,25 @@ export default function MapClickHandler() {
     e.preventDefault();
     if (!coords) return;
     setLoading(true);
-    await fetch("/api/points", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        latitude: coords.lat,
-        longitude: coords.lng,
-        ...form,
-      }),
-    });
+
+    try {
+      const response = await fetch("/api/points", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          latitude: coords.lat,
+          longitude: coords.lng,
+          ...form,
+        }),
+      });
+
+      if (response.ok) {
+        onPointCreated();
+      }
+    } catch (error) {
+      console.error("Error creating point:", error);
+    }
+
     setLoading(false);
     setOpen(false);
     setForm({ name: "", description: "", author: "", category: "" });
@@ -80,15 +96,7 @@ export default function MapClickHandler() {
               required
             />
           </div>
-          <div>
-            <Label>Autor</Label>
-            <Input
-              name="author"
-              value={form.author}
-              onChange={handleChange}
-              required
-            />
-          </div>
+
           <div>
             <Label>Categoría</Label>
             <Input

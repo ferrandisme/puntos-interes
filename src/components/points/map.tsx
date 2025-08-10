@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -16,10 +16,11 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 
-function PointsLayer() {
+function PointsLayer({ refreshTrigger }: { refreshTrigger: number }) {
   const [points, setPoints] = useState<Point[]>([]);
   const [selectedPointId, setSelectedPointId] = useState<string | null>(null);
   const [popupPos, setPopupPos] = useState<[number, number] | null>(null);
+  const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
 
   const fetchPoints = async (center: L.LatLng, radius: number) => {
     const res = await fetch(
@@ -28,6 +29,22 @@ function PointsLayer() {
     const data = await res.json();
     setPoints(data);
   };
+
+  // Función para refrescar los puntos del área visible actual
+  const refreshPoints = useCallback(() => {
+    if (mapInstance) {
+      const center = mapInstance.getCenter();
+      const radius = getRadius(mapInstance);
+      fetchPoints(center, radius);
+    }
+  }, [mapInstance]);
+
+  // Refrescar cuando cambie el trigger
+  React.useEffect(() => {
+    if (refreshTrigger > 0) {
+      refreshPoints();
+    }
+  }, [refreshTrigger, refreshPoints]);
 
   // Calcula el radio visible del mapa en metros (aprox)
   const getRadius = (map: L.Map) => {
@@ -41,6 +58,7 @@ function PointsLayer() {
   useMapEvents({
     moveend: (e) => {
       const map = e.target;
+      setMapInstance(map);
       const center = map.getCenter();
       const radius = getRadius(map);
       fetchPoints(center, radius);
@@ -48,6 +66,7 @@ function PointsLayer() {
     // Carga inicial
     load: (e) => {
       const map = e.target;
+      setMapInstance(map);
       const center = map.getCenter();
       const radius = getRadius(map);
       fetchPoints(center, radius);
@@ -94,6 +113,12 @@ interface MapProps {
 }
 
 export default function Map({ position, zoom }: MapProps) {
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const triggerRefresh = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
+
   return (
     <div className="w-full h-full">
       <MapContainer
@@ -108,8 +133,8 @@ export default function Map({ position, zoom }: MapProps) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <PointsLayer />
-        <MapClickHandler />
+        <PointsLayer refreshTrigger={refreshTrigger} />
+        <MapClickHandler onPointCreated={triggerRefresh} />
       </MapContainer>
     </div>
   );
