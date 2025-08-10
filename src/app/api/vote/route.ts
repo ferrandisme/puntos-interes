@@ -32,24 +32,25 @@ export const POST = async (request: NextRequest): Promise<Response> => {
       pointId,
     });
 
+    let vote;
     if (existingVote) {
-      return new Response("You have already voted for this point", {
-        status: 409,
+      // Actualizar voto existente
+      existingVote.score = score;
+      vote = await existingVote.save();
+    } else {
+      // Crear nuevo voto
+      vote = new Vote({
+        userId: session.user.id,
+        pointId,
+        score,
       });
+      await vote.save();
     }
-
-    const newVote = new Vote({
-      userId: session.user.id,
-      pointId,
-      score,
-    });
-
-    await newVote.save();
 
     // Recalcular rating y votes del punto
     await recalculatePointRating(pointId);
 
-    return new Response(JSON.stringify(newVote), { status: 200 });
+    return new Response(JSON.stringify(vote), { status: 200 });
   } catch (error) {
     console.error("Error creating vote:", error);
     return new Response("Failed to create vote", { status: 500 });

@@ -78,7 +78,8 @@ export default function PointDetails({ id }: PointDetailsProps) {
           <span className="text-sm font-medium text-gray-700">
             {point?.rating && point?.votes ? (
               <>
-                {point.rating.toFixed(1)}⭐ ({point.votes} voto{point.votes !== 1 ? "s" : ""})
+                {point.rating.toFixed(1)}⭐ ({point.votes} voto
+                {point.votes !== 1 ? "s" : ""})
               </>
             ) : (
               "Sin calificar aún"
@@ -88,27 +89,29 @@ export default function PointDetails({ id }: PointDetailsProps) {
 
         {session?.user && (
           <div className="mt-3">
-            {userHasVoted ? (
-              <div className="text-center">
-                <p className="text-xs text-gray-500 mb-1">Tu votación:</p>
-                <StarRating rating={userVote} readonly size="sm" centered={true} />
-              </div>
-            ) : (
-              <div className="text-center">
-                <p className="text-xs text-gray-700 mb-2">
-                  Califica este lugar:
+            <div className="text-center">
+              <p className="text-xs text-gray-700 mb-2">
+                {userHasVoted
+                  ? "Cambiar tu calificación:"
+                  : "Califica este lugar:"}
+              </p>
+              <StarRating
+                rating={userVote}
+                onRatingChange={handleVote}
+                size="md"
+                centered={true}
+              />
+              {userHasVoted && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Haz clic en una estrella para cambiar tu voto
                 </p>
-                <StarRating 
-                  rating={0} 
-                  onRatingChange={handleVote} 
-                  size="md" 
-                  centered={true}
-                />
-                {isVoting && (
-                  <p className="text-xs text-blue-600 mt-1">Enviando voto...</p>
-                )}
-              </div>
-            )}
+              )}
+              {isVoting && (
+                <p className="text-xs text-blue-600 mt-1">
+                  {userHasVoted ? "Actualizando voto..." : "Enviando voto..."}
+                </p>
+              )}
+            </div>
           </div>
         )}
 

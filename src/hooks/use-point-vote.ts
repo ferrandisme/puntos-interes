@@ -21,7 +21,7 @@ export function usePointVote(pointId: string): UsePointVoteResult {
   const [isVoting, setIsVoting] = useState(false);
   const { data: session } = useSession();
 
-  const canVote = !!session?.user && !userHasVoted;
+  const canVote = !!session?.user; // Permitir votar siempre que esté autenticado
 
   const checkVoteStatus = async () => {
     if (!session?.user || !pointId) return;
@@ -39,7 +39,7 @@ export function usePointVote(pointId: string): UsePointVoteResult {
   };
 
   const submitVote = async (score: number): Promise<boolean> => {
-    if (!canVote || isVoting) return false;
+    if (!session?.user || isVoting) return false;
 
     setIsVoting(true);
     try {

@@ -45,8 +45,8 @@ export default function StarRating({
   const displayRating = hoveredRating || rating;
 
   return (
-    <div 
-      className={`flex items-center gap-1 ${centered ? 'justify-center' : ''}`} 
+    <div
+      className={`flex items-center gap-1 ${centered ? "justify-center" : ""}`}
       onMouseLeave={handleMouseLeave}
     >
       {[1, 2, 3, 4, 5].map((star) => (
